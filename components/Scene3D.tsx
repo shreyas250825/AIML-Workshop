@@ -4,7 +4,7 @@
  * Scene3D Component
  * 
  * A React Three Fiber component that renders an animated 3D scene with:
- * - Abstract 3D object (icosahedron) with continuous rotation
+ * - BMW M4 Widebody 3D model with continuous rotation
  * - Particle system with configurable count
  * - Optimized lighting configuration
  * - Performance optimizations using useMemo
@@ -12,35 +12,43 @@
  * Requirements: 1.1, 1.2, 1.4, 1.5, 12.1, 12.3, 12.5, 13.4
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { useGLTF, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 /**
- * Rotating 3D object component (icosahedron with torus knot geometry)
- * Implements continuous rotation animation using useFrame
+ * BMW M4 Model component
+ * Loads and displays the BMW M4 Widebody model with rotation animation
  */
-function RotatingObject() {
-  const meshRef = useRef<THREE.Mesh>(null);
+function BMWModel() {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  // Load the BMW M4 model (from workshop root, not public)
+  const { scene } = useGLTF('/bmw-m4-widebody-wwwvecarzcom/source/bmw_m4_modified_widebody_knitro_builds.glb');
 
   // Continuous rotation animation
   useFrame((state, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += delta * 0.3;
-      meshRef.current.rotation.y += delta * 0.5;
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.3;
     }
   });
 
   return (
-    <mesh ref={meshRef}>
-      <icosahedronGeometry args={[1.5, 1]} />
-      <meshStandardMaterial
-        color="#6366f1"
-        metalness={0.7}
-        roughness={0.2}
-        emissive="#4f46e5"
-        emissiveIntensity={0.2}
-      />
+    <group ref={groupRef} position={[0, -1, 0]} scale={1.5}>
+      <primitive object={scene} />
+    </group>
+  );
+}
+
+/**
+ * Loading fallback component
+ */
+function Loader() {
+  return (
+    <mesh>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="#6366f1" wireframe />
     </mesh>
   );
 }
@@ -117,7 +125,7 @@ export default function Scene3D({
   return (
     <div className={`w-full h-full ${className}`}>
       <Canvas
-        camera={{ position: [0, 0, 8], fov: 50 }}
+        camera={{ position: [5, 2, 5], fov: 50 }}
         dpr={[1, 2]} // Adaptive pixel ratio for performance
         performance={{ min: 0.5 }} // Performance degradation settings
         gl={{ 
@@ -127,18 +135,29 @@ export default function Scene3D({
         }}
       >
         {/* Lighting configuration */}
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
-        <pointLight position={[0, 10, -10]} intensity={0.7} color="#6366f1" />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 5]} intensity={1} color="#ffffff" />
+        <directionalLight position={[-10, 5, -5]} intensity={0.5} color="#8b5cf6" />
+        <spotLight position={[0, 10, 0]} intensity={0.8} angle={0.6} penumbra={1} />
 
         {/* 3D Objects */}
-        <RotatingObject />
+        <Suspense fallback={<Loader />}>
+          <BMWModel />
+        </Suspense>
         <ParticleSystem count={particleCount} />
 
-        {/* Optional: OrbitControls for debugging (can be removed) */}
-        {/* <OrbitControls enableZoom={false} enablePan={false} /> */}
+        {/* OrbitControls for user interaction */}
+        <OrbitControls 
+          enableZoom={true} 
+          enablePan={false}
+          minDistance={3}
+          maxDistance={15}
+          autoRotate={false}
+        />
       </Canvas>
     </div>
   );
 }
+
+// Preload the BMW model for better performance
+useGLTF.preload('/bmw-m4-widebody-wwwvecarzcom/source/bmw_m4_modified_widebody_knitro_builds.glb');
