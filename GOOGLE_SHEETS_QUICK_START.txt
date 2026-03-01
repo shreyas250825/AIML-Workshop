@@ -1,0 +1,61 @@
+GOOGLE SHEETS INTEGRATION - QUICK START
+========================================
+
+Your workshop platform now stores user registrations in Google Sheets!
+
+SETUP (5 minutes):
+------------------
+1. Create Google Sheet with headers:
+   ID | Name | Email | USN | Password | Role | Created At | Last Login
+
+2. Share sheet as "Anyone with link can view"
+
+3. Get Sheet ID from URL (between /d/ and /edit)
+
+4. Get API Key from Google Cloud Console:
+   - Enable Google Sheets API
+   - Create API Key
+   - Restrict to Google Sheets API only
+
+5. Create .env.local file in workshop folder:
+   NEXT_PUBLIC_GOOGLE_SHEET_ID=your_sheet_id
+   NEXT_PUBLIC_GOOGLE_API_KEY=your_api_key
+   GOOGLE_SHEETS_API_KEY=your_api_key
+
+6. Restart: npm run dev
+
+FEATURES:
+---------
+✓ All signups saved to Google Sheets automatically
+✓ Login verifies against Google Sheets
+✓ Admin dashboard shows all users from Sheets
+✓ Leaderboard displays real-time student data
+✓ Falls back to localStorage if Sheets unavailable
+✓ View/edit users directly in Google Sheets
+✓ Export to Excel/CSV anytime
+
+FILES CREATED:
+--------------
+- workshop/lib/googleSheets.ts (API integration)
+- workshop/app/api/sheets/append/route.ts (Add users)
+- workshop/app/api/sheets/update-login/route.ts (Update login time)
+- workshop/SETUP_GOOGLE_SHEETS.md (Detailed guide)
+- workshop/.env.local.example (Template)
+
+TESTING:
+--------
+1. Register new user at /signup
+2. Check Google Sheet - user appears!
+3. Login with new user
+4. Check /admin/dashboard - all users visible
+5. Check /leaderboard - student list updates
+
+TROUBLESHOOTING:
+----------------
+- Check browser console for errors
+- Verify Sheet ID and API Key are correct
+- Make sure sheet is shared publicly
+- Confirm Google Sheets API is enabled
+- App works with localStorage if Sheets fails
+
+For detailed instructions, see: SETUP_GOOGLE_SHEETS.md

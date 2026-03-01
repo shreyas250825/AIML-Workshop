@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Workshop Platform
+
+A modern web application for delivering an immersive 2-day AI/ML workshop experience featuring a cinematic 3D introduction, interactive case studies, leaderboards, polls, and materials distribution.
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS (with dark mode support)
+- **Animations**: Framer Motion
+- **3D Graphics**: React Three Fiber, React Three Drei
+- **Code Highlighting**: React Syntax Highlighter
+
+## Project Structure
+
+```
+workshop/
+├── app/              # Next.js App Router pages and layouts
+├── components/       # Reusable React components
+├── lib/              # Utility functions and helpers
+├── types/            # TypeScript type definitions
+├── data/             # Mock data for case studies, polls, etc.
+└── public/           # Static assets
+```
 
 ## Getting Started
 
-First, run the development server:
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+### Production
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 🎬 Cinematic 3D intro with automatic transition
+- 📚 7 interactive case studies with password-protected steps
+- 🏆 Real-time leaderboard
+- 📊 Interactive polling system
+- ❓ Doubt submission and tracking
+- 📥 Materials distribution (datasets and notebooks)
+- 🎨 Dark/light theme transitions
+- 📱 Fully responsive design
+- 💾 Session-based state management
 
-## Deploy on Vercel
+## Requirements
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Node.js 18+ 
+- npm or yarn
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+Private - AI Workshop Platform

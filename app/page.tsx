@@ -1,101 +1,145 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/AuthContext';
+
+export default function IntroPage() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+
+  useEffect(() => {
+    // Wait for auth to load
+    if (loading) return;
+
+    // Check if user is already authenticated
+    if (user) {
+      setShouldRedirect(true);
+      const destination = user.role === 'admin' ? '/admin/dashboard' : '/dashboard';
+      router.replace(destination);
+      return;
+    }
+
+    // Auto-transition to login after 7 seconds for non-authenticated users
+    const timer = setTimeout(() => {
+      handleTransition();
+    }, 7000);
+
+    return () => clearTimeout(timer);
+  }, [user, loading, router]);
+
+  const handleTransition = () => {
+    if (shouldRedirect) return; // Prevent double transition
+    setIsTransitioning(true);
+    setTimeout(() => {
+      router.push('/login');
+    }, 800);
+  };
+
+  // Don't render intro if redirecting
+  if (shouldRedirect) {
+    return null;
+  }
+
+  const caseStudies = [
+    'House Price Prediction',
+    'Credit Risk Classification',
+    'Early Sepsis Risk Prediction',
+    'Stock Trend Classification',
+    'Neural Networks for Digital Classification',
+    'Semantic Similarity Modeling',
+    'RAG-based AI Chatbot Development'
+  ];
+
+  const labelPositions = [
+    { top: '15%', left: '20%' },
+    { top: '25%', right: '15%' },
+    { top: '45%', left: '10%' },
+    { top: '45%', right: '10%' },
+    { bottom: '25%', left: '18%' },
+    { bottom: '25%', right: '18%' },
+    { bottom: '15%', left: '50%', transform: 'translateX(-50%)' }
+  ];
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: isTransitioning ? 0 : 1 }}
+      transition={{ duration: 0.8 }}
+      className="relative w-full h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 overflow-hidden"
+    >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isTransitioning ? 1 : 0 }}
+        transition={{ duration: 0.8 }}
+        className="absolute inset-0 bg-white z-50 pointer-events-none"
+      />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className="absolute inset-0 flex items-center justify-center">
+        <motion.div
+          animate={{
+            rotateX: 360,
+            rotateY: 360,
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+          className="w-32 h-32 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-3xl shadow-2xl"
+        />
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none">
+        {caseStudies.map((title, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 + index * 0.15 }}
+            style={labelPositions[index]}
+            className="absolute"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            <div className="bg-white/10 backdrop-blur-md border border-purple-400/30 rounded-lg px-4 py-2 shadow-lg">
+              <div className="text-purple-300 text-xs font-semibold mb-1">
+                Case Study {index + 1}
+              </div>
+              <div className="text-white text-sm font-medium max-w-[180px] truncate">
+                {title}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 1.5 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleTransition}
+        className="absolute bottom-8 right-8 px-6 py-3 bg-white/10 backdrop-blur-md border border-purple-400/50 rounded-lg text-white font-semibold shadow-lg hover:bg-purple-600/30 transition-all"
+      >
+        Skip Intro →
+      </motion.button>
+
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.5 }}
+        className="absolute top-8 left-0 right-0 text-center"
+      >
+        <h1 className="text-4xl md:text-5xl font-bold text-white">
+          AI Workshop Platform
+        </h1>
+        <p className="text-lg text-purple-300 mt-2">
+          Interactive AI/ML Learning Experience
+        </p>
+      </motion.div>
+    </motion.div>
   );
 }

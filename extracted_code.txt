@@ -1,0 +1,771 @@
+
+
+============================================================
+CELL 0
+============================================================
+
+# Case Study 1
+# Step !
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+
+============================================================
+CELL 1
+============================================================
+
+# Step 2 a
+data=pd.read_csv("RCaseStudy1_Dataset.csv")
+
+============================================================
+CELL 2
+============================================================
+
+#Step 2 b
+#np.random.seed(42) #Used in NumPy to make random number generation reproducible.
+# 42 is a number popularized by The Hitchhiker’s Guide to the Galaxy as “the answer to life, the universe, and everything”
+#If you run your code today and again tomorrow, you should get the same output.
+
+#area=np.random.uniform(500,3000,100)
+
+#price = 50000 + (area * 150) + np.random.normal(0, 20000, 100)
+
+#data =pd.DataFrame({'Area':area,'Price':price})
+
+============================================================
+CELL 3
+============================================================
+
+#Step 3
+plt.scatter(data["Area"], data["Price"])
+plt.xlabel("Area (sq ft)")
+plt.ylabel("Price")
+plt.title("House Price Dataset")
+plt.show()
+
+============================================================
+CELL 4
+============================================================
+
+# Step 4
+X= data[['Area']]
+y= data['Price']
+
+linear_model=LinearRegression();
+linear_model.fit(X,y);
+
+y_pred_linear= linear_model.predict(X);
+
+============================================================
+CELL 5
+============================================================
+
+#Step 5
+plt.scatter(X, y)
+plt.plot(X, y_pred_linear, color='red')
+plt.xlabel("Area")
+plt.ylabel("Price")
+plt.title("Linear Regression Fit")
+plt.show()
+
+============================================================
+CELL 6
+============================================================
+
+# Step 6
+mse_linear=mean_squared_error(y,y_pred_linear);
+print("Linear Regression MSE:", mse_linear)
+
+root_mean_squared_error_linear=np.sqrt(mse_linear);
+print("Linear Regression RMSE:", root_mean_squared_error_linear)
+
+============================================================
+CELL 7
+============================================================
+
+# Step 7
+poly = PolynomialFeatures(degree=2)
+X_poly = poly.fit_transform(X)
+
+poly_model = LinearRegression()
+poly_model.fit(X_poly, y)
+
+y_pred_poly = poly_model.predict(X_poly)
+
+============================================================
+CELL 8
+============================================================
+
+# Step 8
+sorted_zip = sorted(zip(X["Area"], y_pred_poly))
+X_sorted, y_poly_sorted = zip(*sorted_zip)
+
+# It first pairs each house’s area with its predicted price using zip().
+# Then it sorts those pairs by area (smallest to largest).
+# This helps you plot a smooth prediction line instead of a messy zigzag graph.
+
+plt.scatter(X, y)
+plt.plot(X_sorted, y_poly_sorted, color='green')
+plt.xlabel("Area")
+plt.ylabel("Price")
+plt.title("Polynomial Regression Fit")
+plt.show()
+
+============================================================
+CELL 9
+============================================================
+
+#Step 9
+mse_poly = mean_squared_error(y, y_pred_poly)
+print("Polynomial Regression MSE:", mse_poly)
+root_mean_squared_error_linear=np.sqrt(mse_poly);
+print("Polynomial Regression RMSE:", root_mean_squared_error_linear)
+
+============================================================
+CELL 10
+============================================================
+
+#Case Study 2
+#Step 1
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report
+
+============================================================
+CELL 11
+============================================================
+
+#Step 2
+data=pd.read_csv("RCaseStudy2_Dataset.csv")
+
+============================================================
+CELL 12
+============================================================
+
+#Step 3
+X = data[["Income", "CreditScore", "DebtRatio", "EmploymentYears", "LoanAmount"]]
+y = data["Risk"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+============================================================
+CELL 13
+============================================================
+
+#Step 4 - To Check it
+ay=data.head(5);
+print(ay)
+
+============================================================
+CELL 14
+============================================================
+
+#STEP 4 – Train Logistic Model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+============================================================
+CELL 15
+============================================================
+
+# Step 5 Compute Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+============================================================
+CELL 16
+============================================================
+
+#Step 6 Print Classification Report
+print(classification_report(y_test, y_pred))
+
+============================================================
+CELL 17
+============================================================
+
+#Step 7- Save a model
+# Save model & scaler
+import joblib
+joblib.dump(model, "credit_model.pkl")
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+#Then train your model with X_train_scaled
+joblib.dump(scaler, "scaler.pkl")
+
+print("Model saved successfully!")
+
+============================================================
+CELL 18
+============================================================
+
+from google.colab import files
+files.download("credit_model.pkl")
+files.download("scaler.pkl")
+
+============================================================
+CELL 19
+============================================================
+
+#Case Study 3
+#Step 1 Import Libraries
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report
+
+============================================================
+CELL 20
+============================================================
+
+data=pd.read_csv("CaseStudy3_Dataset.csv")
+
+============================================================
+CELL 21
+============================================================
+
+print(data.head())
+
+============================================================
+CELL 22
+============================================================
+
+# Define Sepsis Risk Rule
+data["Sepsis"] = (
+    (data["HeartRate"] > 100) &
+    (data["Temperature"] > 100) &
+    (data["WBC"] > 12000)
+).astype(int)
+
+============================================================
+CELL 23
+============================================================
+
+X = data.drop("Sepsis", axis=1)
+y = data["Sepsis"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+============================================================
+CELL 24
+============================================================
+
+model = LogisticRegression(class_weight="balanced", max_iter=1000)
+model.fit(X_train, y_train)
+
+============================================================
+CELL 25
+============================================================
+
+y_pred = model.predict(X_test)
+
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+============================================================
+CELL 26
+============================================================
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+============================================================
+CELL 27
+============================================================
+
+y_prob = model.predict_proba(X_test)[:,1]
+
+print("Sample Probabilities:")
+print(y_prob[:10])
+
+============================================================
+CELL 28
+============================================================
+
+#Case Study 4
+#Stock Trend Classification
+!pip install yfinance
+
+============================================================
+CELL 29
+============================================================
+
+import yfinance as yf
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.model_selection import train_test_split
+# The ValueError (Found array with 0 sample(s)) occurs because the DataFrame
+# 'stock' becomes empty in subsequent cells due to aggressive .dropna() calls.
+# This import cell cannot directly fix that data processing issue.
+
+============================================================
+CELL 30
+============================================================
+
+#stock = yf.download("AAPL", start="2015-01-01", end="2024-01-01")
+#stock = stock.dropna()
+#stock.head()
+
+============================================================
+CELL 31
+============================================================
+
+stock_symbol = "AAPL"  # Define the stock symbol here
+stock = yf.download(
+    stock_symbol,
+    start="2015-01-01",
+    end="2024-01-01",
+    progress=False
+)
+
+if stock.empty:
+    raise ValueError("Stock data download failed. Check internet or ticker symbol.")
+
+============================================================
+CELL 32
+============================================================
+
+stock=pd.read_csv("stock_backup.csv")
+
+============================================================
+CELL 33
+============================================================
+
+stock.head()
+
+============================================================
+CELL 34
+============================================================
+
+from google.colab import sheets
+# Flatten the MultiIndex columns to single-level column names
+# The previous line 'stock.columns = stock.columns.get_level_values(1)' caused an IndexError because the columns were already single-level.
+# The 'stock.head()' output also indicates that column names were not the standard ones (e.g., 'Close').
+# We will explicitly rename the columns to the expected financial metrics.
+stock.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+sheet = sheets.InteractiveSheet(df=stock)
+
+============================================================
+CELL 35
+============================================================
+
+stock["Return"] = stock["Close"].pct_change()
+stock["MA_5"] = stock["Close"].rolling(5).mean()
+stock["MA_10"] = stock["Close"].rolling(10).mean()
+stock["MA_20"] = stock["Close"].rolling(20).mean()
+stock["Volatility"] = stock["Return"].rolling(5).std()
+
+============================================================
+CELL 36
+============================================================
+
+stock["Target"] = (stock["Close"].shift(-1) > stock["Close"]).astype(int)
+stock=stock.dropna();
+
+============================================================
+CELL 37
+============================================================
+
+features = ["Return", "MA_5", "MA_10", "MA_20", "Volatility"]
+
+X = stock[features]
+y = stock["Target"]
+
+============================================================
+CELL 38
+============================================================
+
+split = int(len(stock) * 0.8)
+
+X_train = X[:split]
+X_test = X[split:]
+y_train = y[:split]
+y_test = y[split:]
+
+============================================================
+CELL 39
+============================================================
+
+print("X shape:", X.shape)
+print("Split index:", split)
+print("Train shape:", X_train.shape)
+
+============================================================
+CELL 40
+============================================================
+
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+============================================================
+CELL 41
+============================================================
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+============================================================
+CELL 42
+============================================================
+
+baseline = y_test.value_counts(normalize=True).max()
+print("Baseline Accuracy:", baseline)
+
+============================================================
+CELL 43
+============================================================
+
+stock.to_csv("stock_backup.csv")
+
+============================================================
+CELL 44
+============================================================
+
+#Case Study 5
+#Step 1
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow import keras
+from tensorflow.keras.datasets import mnist
+
+============================================================
+CELL 45
+============================================================
+
+(X_train, y_train), (X_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+============================================================
+CELL 46
+============================================================
+
+print("Training data shape:", X_train.shape)
+print("Test data shape:", X_test.shape)
+
+============================================================
+CELL 47
+============================================================
+
+plt.figure(figsize=(8,4))
+for i in range(10):
+    plt.subplot(2,5,i+1)
+    plt.imshow(X_train[i], cmap='gray')
+    plt.title(f"Label: {y_train[i]}")
+    plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+============================================================
+CELL 48
+============================================================
+
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+
+============================================================
+CELL 49
+============================================================
+
+from tensorflow.keras.utils import to_categorical
+
+y_train_cat = to_categorical(y_train, 10)
+y_test_cat = to_categorical(y_test, 10)
+
+============================================================
+CELL 50
+============================================================
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+
+model = Sequential([
+    Flatten(input_shape=(28,28)),
+    Dense(128, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(10, activation='softmax')
+])
+
+============================================================
+CELL 51
+============================================================
+
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+============================================================
+CELL 52
+============================================================
+
+history = model.fit(
+    X_train, y_train_cat,
+    epochs=10,
+    batch_size=128,
+    validation_split=0.1
+)
+
+============================================================
+CELL 53
+============================================================
+
+test_loss, test_accuracy = model.evaluate(X_test, y_test_cat)
+print("Test Accuracy:", test_accuracy)
+
+============================================================
+CELL 54
+============================================================
+
+predictions = model.predict(X_test)
+predicted_labels = np.argmax(predictions, axis=1)
+
+============================================================
+CELL 55
+============================================================
+
+plt.figure(figsize=(8,4))
+for i in range(10):
+    plt.subplot(2,5,i+1)
+    plt.imshow(X_test[i], cmap='gray')
+    plt.title(f"Predicted: {predicted_labels[i]}")
+    plt.axis("off")
+plt.tight_layout()
+plt.show()
+
+============================================================
+CELL 56
+============================================================
+
+# -----------------------------------------
+# Predict a Specific Image
+# -----------------------------------------
+
+index = 97  # Change this number to test different images
+
+image = X_test[index]
+true_label = y_test[index]
+
+# Model expects batch input, so reshape
+image_reshaped = np.expand_dims(image, axis=0)
+
+prediction = model.predict(image_reshaped)
+predicted_digit = np.argmax(prediction)
+
+print("True Label:", true_label)
+print("Predicted Label:", predicted_digit)
+print("Prediction Probabilities:", prediction)
+
+# Show image
+plt.imshow(image, cmap='gray')
+plt.title(f"True: {true_label} | Predicted: {predicted_digit}")
+plt.axis("off")
+plt.show()
+
+============================================================
+CELL 57
+============================================================
+
+index = int(input("Enter test image index (0–9999): "))
+
+image = X_test[index]
+true_label = y_test[index]
+
+image_reshaped = np.expand_dims(image, axis=0)
+prediction = model.predict(image_reshaped)
+predicted_digit = np.argmax(prediction)
+
+print("True Label:", true_label)
+print("Predicted Label:", predicted_digit)
+
+plt.imshow(image, cmap='gray')
+plt.title(f"True: {true_label} | Predicted: {predicted_digit}")
+plt.axis("off")
+plt.show()
+
+============================================================
+CELL 58
+============================================================
+
+model.save("mnist_model.h5")
+
+============================================================
+CELL 59
+============================================================
+
+#Case Study 6
+#Semantic Similarity using Neural Networks (Mini Plagiarism Checker)
+!pip install sentence-transformers
+
+============================================================
+CELL 60
+============================================================
+
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+============================================================
+CELL 61
+============================================================
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+============================================================
+CELL 62
+============================================================
+
+text1 = "Machine learning is used to predict house prices."
+text2 = "AI models can estimate property values."
+
+============================================================
+CELL 63
+============================================================
+
+embedding1 = model.encode([text1])
+embedding2 = model.encode([text2])
+
+============================================================
+CELL 64
+============================================================
+
+similarity_score = cosine_similarity(embedding1, embedding2)[0][0]
+print("Similarity Score:", round(similarity_score, 3))
+
+============================================================
+CELL 65
+============================================================
+
+text3 = "The football match was exciting."
+
+embedding3 = model.encode([text3])
+similarity_score2 = cosine_similarity(embedding1, embedding3)[0][0]
+
+print("Similarity with unrelated sentence:", round(similarity_score2, 3))
+
+============================================================
+CELL 66
+============================================================
+
+text1 = input("Enter First Text: ")
+text2 = input("Enter Second Text: ")
+
+embedding1 = model.encode([text1])
+embedding2 = model.encode([text2])
+
+similarity_score = cosine_similarity(embedding1, embedding2)[0][0]
+
+print("\nSimilarity Score:", round(similarity_score, 3))
+
+if similarity_score > 0.75:
+    print("⚠️ High Similarity – Possible Plagiarism")
+elif similarity_score > 0.5:
+    print("⚠️ Moderate Similarity")
+else:
+    print("✅ Low Similarity – Likely Different Content")
+
+============================================================
+CELL 67
+============================================================
+
+#Case Study 7
+!pip install sentence-transformers scikit-learn numpy
+
+============================================================
+CELL 68
+============================================================
+
+documents = [
+    "Machine learning is a subset of artificial intelligence that focuses on data-driven prediction.",
+    "Neural networks are inspired by biological neurons and are used in deep learning.",
+    "Retrieval-Augmented Generation combines document retrieval with language generation.",
+    "Embeddings convert text into high-dimensional numerical vectors.",
+    "Cosine similarity measures similarity between two vectors."
+]
+
+============================================================
+CELL 69
+============================================================
+
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+doc_embeddings = model.encode(documents)
+
+============================================================
+CELL 70
+============================================================
+
+query = "What is RAG?"
+query_embedding = model.encode([query])
+
+============================================================
+CELL 71
+============================================================
+
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+similarities = cosine_similarity(query_embedding, doc_embeddings)
+
+top_index = np.argmax(similarities)
+retrieved_doc = documents[top_index]
+
+print("Most Relevant Document:")
+print(retrieved_doc)
+
+============================================================
+CELL 72
+============================================================
+
+response = f"Based on retrieved knowledge: {retrieved_doc}"
+
+print("\nChatbot Response:")
+print(response)
+
+============================================================
+CELL 73
+============================================================
+
+def generate_response(query, retrieved_text):
+    return f"Question: {query}\n\nAnswer (Grounded): {retrieved_text}"
+
+print(generate_response(query, retrieved_doc))
+
+============================================================
+CELL 74
+============================================================
+
+while True:
+    query = input("\nAsk a question (type 'exit' to stop): ")
+    if query.lower() == 'exit':
+        break
+
+    query_embedding = model.encode([query])
+    similarities = cosine_similarity(query_embedding, doc_embeddings)
+    top_index = np.argmax(similarities)
+    retrieved_doc = documents[top_index]
+
+    print("\nAnswer:", retrieved_doc)
