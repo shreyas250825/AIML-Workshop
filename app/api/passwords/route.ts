@@ -18,11 +18,14 @@ export async function GET() {
     }
 
     console.log('API Route: Fetching from Google Apps Script...');
-    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+    // Add timestamp to prevent caching
+    const urlWithTimestamp = `${GOOGLE_APPS_SCRIPT_URL}?t=${Date.now()}`;
+    const response = await fetch(urlWithTimestamp, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      cache: 'no-store',
     });
 
     console.log('API Route: Response status:', response.status);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 interface PasswordEntry {
@@ -13,24 +13,45 @@ interface PasswordEntry {
 export default function PasswordsPage() {
   const [entries, setEntries] = useState<PasswordEntry[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent double-fetch in React Strict Mode
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/passwords');
+        console.log('Fetching passwords...');
+        const res = await fetch('/api/passwords', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
         const data = await res.json();
-        if (data.success && data.data) {
-          setEntries(data.data.map((item: any) => ({
+        console.log('Passwords response:', data);
+        
+        if (data.success && data.data && Array.isArray(data.data)) {
+          const mappedEntries = data.data.map((item: any) => ({
             id: item.caseStudyName + '-' + item.stepName,
             caseStudyName: item.caseStudyName,
             stepName: item.stepName,
             password: item.password
-          })));
+          }));
+          console.log('Mapped entries:', mappedEntries);
+          setEntries(mappedEntries);
+        } else {
+          console.error('Invalid data format:', data);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching passwords:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
+
     fetchData();
     const timer = setInterval(fetchData, 5000);
     return () => clearInterval(timer);
@@ -87,7 +108,15 @@ export default function PasswordsPage() {
           <p className="text-gray-600 text-sm">View passwords for case study steps shared by your instructor</p>
         </div>
 
-        {entries.length === 0 ? (
+        {isLoading ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-16 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Passwords...</h3>
+            <p className="text-gray-500 text-sm">Fetching data from Google Sheets</p>
+          </div>
+        ) : entries.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-16 text-center">
             <div className="flex justify-center mb-4">
               <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
