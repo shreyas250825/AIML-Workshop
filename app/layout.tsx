@@ -17,6 +17,9 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "AI Workshop Platform",
   description: "Interactive AI/ML Workshop with Case Studies",
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
