@@ -357,9 +357,5 @@ function DoubtsContent() {
 }
 
 export default function DoubtsPage() {
-  return (
-    <ProtectedRoute>
-      <DoubtsContent />
-    </ProtectedRoute>
-  );
+  return <DoubtsContent />;
 }
