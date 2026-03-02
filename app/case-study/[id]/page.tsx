@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { caseStudyData } from '@/lib/caseStudyData';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -15,6 +15,32 @@ function CaseStudyContent() {
   const [unlockedSteps, setUnlockedSteps] = useState<Set<string>>(new Set());
   const [passwords, setPasswords] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load unlocked steps from localStorage on mount
+  useEffect(() => {
+    if (caseStudy) {
+      const storageKey = `unlocked-steps-${caseStudy.id}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          const unlockedArray = JSON.parse(stored);
+          setUnlockedSteps(new Set(unlockedArray));
+        } catch (e) {
+          console.error('Failed to parse unlocked steps:', e);
+        }
+      }
+      setIsLoaded(true);
+    }
+  }, [caseStudy]);
+
+  // Save unlocked steps to localStorage whenever they change
+  useEffect(() => {
+    if (caseStudy && isLoaded) {
+      const storageKey = `unlocked-steps-${caseStudy.id}`;
+      localStorage.setItem(storageKey, JSON.stringify(Array.from(unlockedSteps)));
+    }
+  }, [unlockedSteps, caseStudy, isLoaded]);
 
   if (!caseStudy) {
     return (
