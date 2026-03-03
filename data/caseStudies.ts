@@ -523,84 +523,219 @@ plt.show()`,
 
   {
     id: 'cs-7',
-    title: 'Natural Language Generation with Transformers',
-    description: 'Fine-tune a transformer model for text generation tasks',
-    problemStatement: 'Build a text generation system that can create coherent and contextually relevant content for automated content creation, chatbots, or creative writing assistance.',
-    whyItMatters: 'Natural language generation powers modern AI assistants, content creation tools, and automated customer service. Understanding transformer architectures is essential for working with state-of-the-art NLP models.',
-    datasetUrl: '/datasets/text-corpus.txt',
+    title: 'RAG-based AI Chatbot Development',
+    description: 'Build a Retrieval-Augmented Generation chatbot using embeddings and document retrieval',
+    problemStatement: 'Create an intelligent chatbot that can answer questions about specific documents by combining document retrieval with language generation. The system should retrieve relevant context from documents and generate accurate, grounded responses.',
+    whyItMatters: 'RAG systems combine the power of large language models with specific domain knowledge, enabling accurate and factual responses. This approach is crucial for building AI assistants that can answer questions about proprietary documents, technical manuals, or specialized knowledge bases.',
+    datasetUrl: '/materials/chatbot.html',
     steps: [
       {
         id: 'cs-7-step-1',
-        title: 'Load and Tokenize Data',
-        password: 'transformer123',
-        codeContent: `from transformers import GPT2Tokenizer, GPT2LMHeadModel
-import torch
+        title: 'Install Dependencies and Load PDF',
+        password: 'rag123',
+        codeContent: `# Install required packages
+!pip install sentence-transformers scikit-learn numpy pypdf
 
-# Load pre-trained tokenizer and model
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-model = GPT2LMHeadModel.from_pretrained('gpt2')
+# Step 1: Load PDF document
+from pypdf import PdfReader
 
-# Load and tokenize text data
-with open('text-corpus.txt', 'r') as f:
-    text = f.read()
+reader = PdfReader("TheMerchantOfVenice.pdf")
+text = ""
+for page in reader.pages:
+    text += page.extract_text()
 
-# Tokenize
-inputs = tokenizer(text, return_tensors='pt', max_length=512, truncation=True)
-print(f'Input shape: {inputs["input_ids"].shape}')`,
+# Split text into chunks
+def chunk_text(text, chunk_size=800, overlap=200):
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunk = text[start:end]
+        chunks.append(chunk)
+        start += chunk_size - overlap
+    return chunks
+
+documents = chunk_text(text)
+print(f"Created {len(documents)} document chunks")
+print("Sample chunk:", text[1000:4000])`,
         language: 'python'
       },
       {
         id: 'cs-7-step-2',
-        title: 'Fine-tune the Model',
-        password: 'finetune456',
-        codeContent: `from transformers import Trainer, TrainingArguments
+        title: 'Create Document Embeddings',
+        password: 'embeddings456',
+        codeContent: `from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
-# Prepare training arguments
-training_args = TrainingArguments(
-    output_dir='./results',
-    num_train_epochs=3,
-    per_device_train_batch_size=4,
-    save_steps=1000,
-    save_total_limit=2,
-    learning_rate=5e-5
-)
+# Load embedding model
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Create trainer
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=inputs
-)
+# Create embeddings for all document chunks
+doc_embeddings = model.encode(documents)
+print("Document embeddings shape:", doc_embeddings.shape)
 
-# Fine-tune
-trainer.train()`,
+# Example: Test similarity between documents
+similarities = cosine_similarity(doc_embeddings[:5], doc_embeddings[:5])
+print("Sample similarity matrix:")
+print(similarities)`,
         language: 'python'
       },
       {
         id: 'cs-7-step-3',
-        title: 'Generate Text',
-        password: 'generate789',
-        codeContent: `def generate_text(prompt, max_length=100, temperature=0.7):
-    input_ids = tokenizer.encode(prompt, return_tensors='pt')
-    
-    output = model.generate(
-        input_ids,
-        max_length=max_length,
-        temperature=temperature,
-        num_return_sequences=1,
-        no_repeat_ngram_size=2,
-        top_k=50,
-        top_p=0.95
-    )
-    
-    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-    return generated_text
+        title: 'Implement Document Retrieval',
+        password: 'retrieval789',
+        codeContent: `# Query the document
+query = "Who is Bassanio?"
+query_embedding = model.encode([query])
 
-# Example generation
-prompt = "The future of artificial intelligence is"
-generated = generate_text(prompt, max_length=150)
-print(f'Prompt: {prompt}')
-print(f'Generated: {generated}')`,
+# Calculate similarities with all documents
+query_embedding = query_embedding.reshape(1, -1)
+similarities = cosine_similarity(query_embedding, doc_embeddings)
+
+# Get top 5 most relevant documents
+top_indices = np.argsort(similarities[0])[-5:][::-1]
+retrieved_docs = [documents[i] for i in top_indices]
+
+# Combine retrieved documents as context
+context = " ".join(retrieved_docs)
+
+print("Most Relevant Documents:")
+for i, idx in enumerate(top_indices, 1):
+    print(f"{i}. Document {idx} (Similarity: {similarities[0][idx]:.3f})")
+    print(documents[idx][:200], "...\\n")`,
+        language: 'python'
+      },
+      {
+        id: 'cs-7-step-4',
+        title: 'Generate Grounded Response',
+        password: 'generate101',
+        codeContent: `# Simple response generation using retrieved context
+def generate_response(query, retrieved_text):
+    return f"Question: {query}\\n\\nAnswer (Grounded): {retrieved_text}"
+
+# Get the most relevant document
+retrieved_doc = documents[top_indices[0]]
+
+response = f"Based on retrieved knowledge: {retrieved_doc}"
+print("\\nChatbot Response:")
+print(response)
+
+# Alternative: More structured response
+print("\\n" + "="*50)
+print(generate_response(query, retrieved_doc))`,
+        language: 'python'
+      },
+      {
+        id: 'cs-7-step-5',
+        title: 'Advanced Generation with LLM',
+        password: 'advanced202',
+        codeContent: `# Optional: Use a language model for better response generation
+from transformers import pipeline
+
+# Load text generation model
+generator = pipeline("text-generation", model="google/flan-t5-base")
+
+# Create prompt with context
+prompt = f"""You are a literature assistant.
+Answer the question clearly in 2-3 sentences.
+If the answer is not explicitly stated, infer it from context.
+
+Context:
+{context}
+
+Question:
+{query}
+
+Answer:"""
+
+# Generate response
+response = generator(prompt, max_new_tokens=120, do_sample=False)
+print("\\nAI-Generated Response:")
+print(response[0]['generated_text'])`,
+        language: 'python'
+      },
+      {
+        id: 'cs-7-step-6',
+        title: 'Build Interactive Chatbot',
+        password: 'interface303',
+        codeContent: `# Create an interactive chatbot function
+def rag_chatbot(query, top_k=5):
+    # Encode query
+    query_embedding = model.encode([query]).reshape(1, -1)
+    
+    # Find similar documents
+    similarities = cosine_similarity(query_embedding, doc_embeddings)
+    top_indices = np.argsort(similarities[0])[-top_k:][::-1]
+    
+    # Retrieve context
+    context = " ".join([documents[i] for i in top_indices])
+    
+    # Generate response
+    response = f"Based on the document:\\n\\n{context[:500]}..."
+    return response
+
+# Test the chatbot
+test_queries = [
+    "Who is Bassanio?",
+    "What is the main conflict in the story?",
+    "Describe Portia's character"
+]
+
+for query in test_queries:
+    print(f"\\nQ: {query}")
+    print(f"A: {rag_chatbot(query)}")
+    print("-" * 80)`,
+        language: 'python'
+      },
+      {
+        id: 'cs-7-step-7',
+        title: 'Deploy with HTML Interface',
+        password: 'deploy404',
+        codeContent: `# Save the model and embeddings for deployment
+import pickle
+
+# Save embeddings and documents
+with open('doc_embeddings.pkl', 'wb') as f:
+    pickle.dump(doc_embeddings, f)
+
+with open('documents.pkl', 'wb') as f:
+    pickle.dump(documents, f)
+
+print("Model artifacts saved!")
+print("\\nNext steps:")
+print("1. Download chatbot.html from Materials section")
+print("2. Set up a backend API to serve the RAG model")
+print("3. Connect the HTML interface to your API")
+print("4. Deploy to a web server")`,
+        language: 'python'
+      },
+      {
+        id: 'cs-7-step-8',
+        title: 'Evaluation and Optimization',
+        password: 'optimize505',
+        codeContent: `# Evaluate retrieval quality
+def evaluate_retrieval(test_queries, expected_docs):
+    scores = []
+    for query, expected in zip(test_queries, expected_docs):
+        query_embedding = model.encode([query]).reshape(1, -1)
+        similarities = cosine_similarity(query_embedding, doc_embeddings)
+        top_idx = np.argmax(similarities[0])
+        
+        # Check if expected document is in top results
+        score = 1 if top_idx in expected else 0
+        scores.append(score)
+    
+    return np.mean(scores)
+
+# Optimization tips
+print("RAG System Optimization Tips:")
+print("1. Chunk Size: Experiment with 500-1000 tokens")
+print("2. Overlap: Use 10-20% overlap between chunks")
+print("3. Top-K: Retrieve 3-5 most relevant documents")
+print("4. Embedding Model: Try different models for your domain")
+print("5. Reranking: Add a reranking step for better results")
+print("6. Caching: Cache embeddings for faster retrieval")`,
         language: 'python'
       }
     ]

@@ -125,5 +125,13 @@ export const materialsData: Material[] = [
     fileUrl: '/materials/chatbot.html',
     description: 'HTML interface for RAG-based AI Chatbot',
     caseStudy: 'RAG-based AI Chatbot Development'
+  },
+  {
+    id: 'material-12',
+    title: 'TheMerchantOfVenice.pdf',
+    type: 'dataset',
+    fileUrl: '/materials/TheMerchantOfVenice.pdf',
+    description: 'Sample PDF document for RAG chatbot training',
+    caseStudy: 'RAG-based AI Chatbot Development'
   }
 ];
