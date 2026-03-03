@@ -115,5 +115,15 @@ export const materialsData: Material[] = [
     fileUrl: '/materials/requirements.txt',
     description: 'Python dependencies for Case Study 2 (Credit Risk) and Case Study 5 (Digital Classification)',
     caseStudy: 'Credit Risk Classification & Neural Networks'
+  },
+  
+  // Case Study 7 - RAG-based AI Chatbot Development
+  {
+    id: 'material-11',
+    title: 'chatbot.html',
+    type: 'code',
+    fileUrl: '/materials/chatbot.html',
+    description: 'HTML interface for RAG-based AI Chatbot',
+    caseStudy: 'RAG-based AI Chatbot Development'
   }
 ];
